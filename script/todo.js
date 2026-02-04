@@ -32,7 +32,7 @@ const TODO_TYPES = [
 ];
 
 async function loadTodos() {
-    const { data, error } = await supabase.from("todos").select("*").order("id", { ascending: true });
+    const { data, error } = await supabase.from("todos").select("*").order("task", { ascending: true });
     if (error) {
         console.error("Error fetching todos:", error);
         return;
@@ -48,6 +48,16 @@ async function loadTodos() {
         li.style.cursor = "pointer";
         li.style.textDecoration = todo.is_checked ? "line-through" : "none";
         li.style.opacity = todo.is_checked ? 0.5 : 1;
+        li.draggable = true;
+        li.dataset.todoId = todo.id;
+        li.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("application/todo-id", todo.id);
+            e.dataTransfer.setData("application/todo-type", todo.type);
+            li.style.opacity = 0.5;
+        });
+        li.addEventListener("dragend", e => {
+            li.style.opacity = todo.is_checked ? 0.5 : 1;
+        });
 
         // チェックアイコン
         const icon = document.createElement("i");
@@ -85,6 +95,18 @@ function setupTypeTabs() {
         btn.style.color = currentType === type.value ? "#fff" : "#333";
         btn.style.cursor = "pointer";
         btn.style.fontWeight = currentType === type.value ? "700" : "400";
+        btn.ondragover = e => { e.preventDefault(); btn.style.background = "#b2dfdb"; };
+        btn.ondragleave = e => { btn.style.background = currentType === type.value ? "var(--color-primary)" : "#eee"; };
+        btn.ondrop = async e => {
+            e.preventDefault();
+            btn.style.background = currentType === type.value ? "var(--color-primary)" : "#eee";
+            const todoId = e.dataTransfer.getData("application/todo-id");
+            const fromType = e.dataTransfer.getData("application/todo-type");
+            if (!todoId || fromType === type.value) return;
+            // type変更
+            await supabase.from("todos").update({ type: type.value }).eq("id", todoId);
+            loadTodos();
+        };
         btn.addEventListener("click", () => {
             currentType = type.value;
             setupTypeTabs();

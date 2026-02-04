@@ -7,6 +7,7 @@
     <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="manifest" href="manifest.json">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap');
 
@@ -184,6 +185,7 @@
         @media (max-width: 700px) {
             .screen>div {
                 width: 100vw;
+                height: 100vh;
                 margin: 0;
                 border-radius: 0;
             }
@@ -289,7 +291,7 @@
             </form>
             <div id="todoCandidates" style="margin-bottom: 1em;"></div>
             <div id="todoTypeTabs" style="margin-bottom:1em; display:flex; gap:0.5em;"></div>
-            <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
+            <ul id="todoList" style="list-style:none; padding:0; margin:0; height: 70vh; overflow: auto;"></ul>
         </div>
     </div>
 
