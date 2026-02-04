@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap');
+
+        :root {
+            --color-bg: #f4f4f4;
+            --color-bg-alt: #e0f7fa;
+            --color-text: #222;
+            --color-primary: #26a69a;
+            --color-card: #fff;
+            --color-border: #e0e0e0;
+            --color-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --color-nav: #fff;
+            --color-nav-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --color-bg: #181a1b;
+            --color-bg-alt: #23272a;
+            --color-text: #f4f4f4;
+            --color-primary: #26a69a;
+            --color-card: #23272a;
+            --color-border: #333;
+            --color-shadow: 0 4px 16px rgba(0, 0, 0, 0.32);
+            --color-nav: #23272a;
+            --color-nav-shadow: 0 -2px 8px rgba(0, 0, 0, 0.32);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            font-family: 'BIZ UDP Gothic', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100vw;
+            height: 100vh;
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .screen>div {
+            width: 90%;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--color-bg-alt);
+            border-radius: 1.5em;
+            box-shadow: var(--color-shadow);
+            margin: 2em auto 0 auto;
+        }
+
+        h1,
+        h2 {
+            margin-bottom: 0.5em;
+        }
+
+        .main__menu-list {
+            display: grid;
+            grid-template-rows: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 18px;
+            width: 90%;
+            margin-top: 20px;
+        }
+
+        .main__menu-list__rows {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .main__menu-list__item {
+            font-size: 1.1em;
+            font-weight: 700;
+            padding: 18px 8px;
+            text-align: center;
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main__menu-list__item:hover {
+            background: var(--color-primary);
+            color: #fff;
+            transform: scale(1.04);
+        }
+
+        #todoForm input {
+            border-radius: 0.5em;
+            border: 1px solid var(--color-border);
+            background: var(--color-card);
+            color: var(--color-text);
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        #todoForm input:focus {
+            border: 1.5px solid var(--color-primary);
+        }
+
+        #todoForm button {
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+            border-radius: 0.5em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #todoForm button:hover {
+            background: #00897b;
+        }
+
+        #todoCandidates button {
+            background: var(--color-card);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5em;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        #todoCandidates button:hover {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        #todoList li {
+            background: var(--color-card);
+            border-radius: 0.5em;
+            border: 1px solid var(--color-border);
+            margin-bottom: 0.5em;
+            box-shadow: var(--color-shadow);
+            padding: 0.7em 1em;
+            font-size: 1.1em;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        #todoList li:hover {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        nav {
+            background: var(--color-nav);
+            box-shadow: var(--color-nav-shadow);
+        }
+
+        nav button {
+            border-radius: 0;
+            border-top: 2px solid transparent;
+            font-weight: 700;
+        }
+
+        nav button.active {
+            border-top: 2px solid var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 700px) {
+            .screen>div {
+                width: 100vw;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .main__menu-list {
+                width: 100%;
+            }
+        }
+    </style>
+    <title>こんだーてMenu</title>
+</head>
+
+<body>
+    <div class="screen active" id="main">
+        <div class="main">
+            <h1 class="main__title">こんだーてMenu</h1>
+            <div class="main__menu-list" id="menu-list">
+                <div class="main__menu-list__rows" id="kondateTableHeader">
+                    <div class="main__menu-list__item"></div>
+                    <div class="main__menu-list__item">
+                        <p>月曜日</p>
+                    </div>
+                    <div class="main__menu-list__item">
+                        <p>火曜日</p>
+                    </div>
+                    <div class="main__menu-list__item">
+                        <p>水曜日</p>
+                    </div>
+                    <div class="main__menu-list__item">
+                        <p>木曜日</p>
+                    </div>
+                    <div class="main__menu-list__item">
+                        <p>金曜日</p>
+                    </div>
+                    <div class="main__menu-list__item">
+                        <p>土日</p>
+                    </div>
+                    <button id="openKondatePanelBtn"
+                        style="position:absolute; right:2vw; top:1vw; z-index:10; background:var(--color-primary); color:#fff; border:none; border-radius:0.5em; padding:0.5em 1.2em; font-size:1em; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.08);">献立追加</button>
+                </div>
+                <div id="kondateTableBody"></div>
+                <div id="kondateList">
+                    <!-- 献立スライドパネル -->
+                    <div id="kondatePanel"
+                        style="position:fixed; top:0; right:-420px; width:400px; height:100vh; background:var(--color-card); box-shadow:-4px 0 16px rgba(0,0,0,0.12); z-index:2000; transition:right 0.3s; display:flex; flex-direction:column;">
+                        <div
+                            style="padding:1em; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:1.2em; font-weight:700;">献立一覧</span>
+                            <button id="closeKondatePanelBtn"
+                                style="background:none; border:none; font-size:1.5em; cursor:pointer; color:var(--color-text);">&times;</button>
+                        </div>
+                        <div id="kondateCardList" style="flex:1; overflow-y:auto; padding:1em;"></div>
+                    </div>
+                    <!-- 献立詳細オーバーレイ -->
+                    <div id="kondateDetailOverlay"
+                        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.45); z-index:3000; align-items:center; justify-content:center;">
+                        <div id="kondateDetailCard"
+                            style="background:var(--color-card); color:var(--color-text); border-radius:1em; box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:2em; min-width:320px; max-width:90vw; max-height:90vh; overflow:auto; position:relative;">
+                            <button id="closeKondateDetailBtn"
+                                style="position:absolute; top:0.7em; right:1em; background:none; border:none; font-size:1.5em; cursor:pointer; color:var(--color-text);">&times;</button>
+                            <div id="kondateDetailContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="editor">
+        <div class="editor">
+            <h2>献立エディター</h2>
+            <form id="kondateEditForm"
+                style="margin-bottom:1.5em; display:flex; flex-direction:column; gap:0.7em; max-width:420px;">
+                <input type="hidden" id="editId" />
+                <input type="text" id="editTitle" placeholder="タイトル" required style="font-size:1em; padding:0.5em;" />
+                <textarea id="editDesc" placeholder="説明" rows="2" style="font-size:1em; padding:0.5em;"></textarea>
+                <input type="text" id="editIngredient" placeholder="材料（カンマまたは空白区切り）" style="font-size:1em; padding:0.5em;" />
+                <div style="display:flex; gap:0.5em;">
+                    <button type="submit" id="saveBtn"
+                        style="background:var(--color-primary); color:#fff; border:none; border-radius:0.5em; padding:0.5em 1.2em; font-size:1em; cursor:pointer;">保存</button>
+                    <button type="button" id="cancelBtn"
+                        style="background:#bbb; color:#fff; border:none; border-radius:0.5em; padding:0.5em 1.2em; font-size:1em; cursor:pointer;">キャンセル</button>
+                </div>
+            </form>
+            <div id="kondateListEditor" style="width:100%; max-width:700px;"></div>
+        </div>
+    </div>
+
+    <div class="screen" id="todo">
+        <div class="todo">
+            <h2>ToDo</h2>
+            <form id="todoForm" style="margin-bottom: 1em; display: flex; gap: 0.5em; align-items: center;">
+                <input type="text" id="todoInput" placeholder="新しいToDoを入力" autocomplete="off"
+                    style="font-size:1em; padding:0.5em;" />
+                <button type="submit" style="font-size:1em; padding:0.5em 1em;">追加</button>
+            </form>
+            <div id="todoCandidates" style="margin-bottom: 1em;"></div>
+            <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+    </div>
+
+    <div class="screen" id="other">
+        <div class="other">
+            <h2>その他のセクション</h2>
+            <div style="margin-bottom:1.5em;">
+                <label style="font-size:1.1em; font-weight:700;">テーマ切替: </label>
+                <button id="themeLightBtn" style="margin-right:0.5em;">ライト</button>
+                <button id="themeDarkBtn">ダーク</button>
+            </div>
+            <p>ここにその他の内容が入ります。</p>
+        </div>
+    </div>
+
+    <script type="module" src="script/kondate.js"></script>
+    <script type="module">
+        import { fetchKondateList, addKondateList, updateKondateList, deleteKondateList } from './script/kondate.js';
+        document.addEventListener('DOMContentLoaded', async function () {
+            if (!document.getElementById('editor')) return;
+            const listDiv = document.getElementById('kondateListEditor');
+            const form = document.getElementById('kondateEditForm');
+            const editId = document.getElementById('editId');
+            const editTitle = document.getElementById('editTitle');
+            const editDesc = document.getElementById('editDesc');
+            const editIngredient = document.getElementById('editIngredient');
+            const saveBtn = document.getElementById('saveBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+
+            let editing = false;
+            let editingId = null;
+
+            async function loadList() {
+                let list = [];
+                try { list = await fetchKondateList(); } catch { listDiv.innerHTML = '<div style="color:red">献立取得失敗</div>'; return; }
+                listDiv.innerHTML = '';
+                list.forEach(item => {
+                    const card = document.createElement('div');
+                    card.style.background = 'var(--color-card)';
+                    card.style.border = '1px solid var(--color-border)';
+                    card.style.borderRadius = '0.7em';
+                    card.style.boxShadow = 'var(--color-shadow)';
+                    card.style.marginBottom = '1em';
+                    card.style.padding = '1em';
+                    card.style.display = 'flex';
+                    card.style.justifyContent = 'space-between';
+                    card.style.alignItems = 'center';
+                    card.innerHTML = `<div><div style='font-weight:700;'>${item.title}</div><div style='font-size:0.95em;color:var(--color-text);margin-top:0.3em;'>${item.desc || ''}</div><div style='font-size:0.9em;color:#888;'>${Array.isArray(item.ingredient) ? item.ingredient.join(', ') : item.ingredient}</div></div>`;
+                    const btns = document.createElement('div');
+                    btns.style.display = 'flex';
+                    btns.style.gap = '0.5em';
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = '編集';
+                    editBtn.style.background = 'var(--color-primary)';
+                    editBtn.style.color = '#fff';
+                    editBtn.style.border = 'none';
+                    editBtn.style.borderRadius = '0.5em';
+                    editBtn.style.padding = '0.3em 1em';
+                    editBtn.style.cursor = 'pointer';
+                    editBtn.addEventListener('click', () => {
+                        editing = true;
+                        editingId = item.id;
+                        editId.value = item.id;
+                        editTitle.value = item.title;
+                        editDesc.value = item.desc;
+                        editIngredient.value = Array.isArray(item.ingredient) ? item.ingredient.join(',') : (item.ingredient || '');
+                        saveBtn.textContent = '更新';
+                    });
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = '削除';
+                    delBtn.style.background = '#e57373';
+                    delBtn.style.color = '#fff';
+                    delBtn.style.border = 'none';
+                    delBtn.style.borderRadius = '0.5em';
+                    delBtn.style.padding = '0.3em 1em';
+                    delBtn.style.cursor = 'pointer';
+                    delBtn.addEventListener('click', async () => {
+                        if (confirm('本当に削除しますか？')) {
+                            await deleteKondateList(item.id);
+                            loadList();
+                        }
+                    });
+                    btns.appendChild(editBtn);
+                    btns.appendChild(delBtn);
+                    card.appendChild(btns);
+                    listDiv.appendChild(card);
+                });
+            }
+
+            form.addEventListener('submit', async e => {
+                e.preventDefault();
+                const ingredientArr = editIngredient.value.split(/[,、\s]+/).map(s => s.trim()).filter(Boolean);
+                if (editing && editingId) {
+                    await updateKondateList(editingId, { title: editTitle.value, desc: editDesc.value, ingredient: ingredientArr });
+                } else {
+                    await addKondateList({ title: editTitle.value, desc: editDesc.value, ingredient: ingredientArr });
+                }
+                editing = false;
+                editingId = null;
+                form.reset();
+                saveBtn.textContent = '保存';
+                loadList();
+            });
+            cancelBtn.addEventListener('click', e => {
+                editing = false;
+                editingId = null;
+                form.reset();
+                saveBtn.textContent = '保存';
+            });
+            loadList();
+        });
+    </script>
+    <script type="module">
+        import { fetchKondateList, fetchKondateRows, updateKondateCell, setCellClickEvent } from './script/kondate.js';
+        // メイン・サブ・otherのrowをテーブル表示し、D&Dでid保存・反映
+        document.addEventListener('DOMContentLoaded', async function () {
+            const tableBody = document.getElementById('kondateTableBody');
+            if (!tableBody) return;
+            const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'weekend'];
+            const rowNames = ['main', 'sub', 'other'];
+            let kondateRows = [];
+            let kondateList = [];
+            try {
+                kondateRows = await fetchKondateRows();
+                kondateList = await fetchKondateList();
+            } catch (e) {
+                tableBody.innerHTML = '<div style="color:red">献立テーブル取得失敗</div>';
+                return;
+            }
+            tableBody.innerHTML = '';
+            rowNames.forEach((rowName, rowIdx) => {
+                const row = kondateRows.find(r => r.name === rowName);
+                const tr = document.createElement('div');
+                tr.className = 'main__menu-list__rows';
+                tr.dataset.rowNum = rowIdx;
+                // rowタイトル
+                const th = document.createElement('div');
+                th.className = 'main__menu-list__item';
+                th.innerHTML = `<span style="font-weight:700;">${rowName === 'main' ? 'メイン' : rowName === 'sub' ? 'サブ' : 'その他'}</span>`;
+                tr.appendChild(th);
+                // 各曜日
+                dayKeys.forEach((dayKey, dayIdx) => {
+                    const td = document.createElement('div');
+                    td.className = 'main__menu-list__item';
+                    td.dataset.dayKey = dayKey;
+                    td.dataset.rowNum = rowIdx;
+                    td.style.minHeight = '3em';
+                    // 現在の献立id→タイトル表示
+                    if (row && row[dayKey]) {
+                        const k = kondateList.find(x => x.id == row[dayKey]);
+                        td.innerHTML = `<p>${k ? k.title : ''}</p>`;
+                    } else {
+                        td.innerHTML = '<p></p>';
+                    }
+                    // D&D
+                    td.ondragover = e => { e.preventDefault(); td.style.background = 'var(--color-primary)'; td.style.color = '#fff'; };
+                    td.ondragleave = e => { td.style.background = ''; td.style.color = ''; };
+                    td.ondrop = async e => {
+                        e.preventDefault();
+                        td.style.background = '';
+                        td.style.color = '';
+                        const kondateListId = e.dataTransfer.getData('application/kondate-list-id');
+                        if (!kondateListId) return;
+                        if (row) {
+                            await updateKondateCell(row.id, dayKey, kondateListId);
+                            const k = kondateList.find(x => x.id == kondateListId);
+                            td.innerHTML = `<p>${k ? k.title : ''}</p>`;
+                        }
+                    };
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+
+            setCellClickEvent();
+        });
+    </script>
+    <script type="module">
+        import { fetchKondateList, fetchKondateRows, setCellClickEvent } from './script/kondate.js';
+        // メニュータイトルクリックで詳細表示
+        document.addEventListener('DOMContentLoaded', setCellClickEvent);
+    </script>
+    <script>
+        // 献立スライドパネルの開閉
+        document.addEventListener('DOMContentLoaded', function () {
+            const openBtn = document.getElementById('openKondatePanelBtn');
+            const closeBtn = document.getElementById('closeKondatePanelBtn');
+            const panel = document.getElementById('kondatePanel');
+            if (openBtn && closeBtn && panel) {
+                openBtn.addEventListener('click', () => {
+                    panel.style.right = '0';
+                });
+                closeBtn.addEventListener('click', () => {
+                    panel.style.right = '-420px';
+                });
+            }
+        });
+    </script>
+    <script type="module" src="script/todo.js"></script>
+    <script>
+        // ページ切り替えUI生成・テーマ切替
+        document.addEventListener('DOMContentLoaded', function () {
+            // 既存のmain, editor, todo, otherのIDを持つscreenを切り替える
+            const screens = ['main', 'editor', 'todo', 'other'];
+            // ナビゲーションバーを作成
+            const nav = document.createElement('nav');
+            nav.style.position = 'fixed';
+            nav.style.bottom = '0';
+            nav.style.left = '0';
+            nav.style.width = '100vw';
+            nav.style.background = 'var(--color-nav)';
+            nav.style.display = 'flex';
+            nav.style.justifyContent = 'space-around';
+            nav.style.boxShadow = 'var(--color-nav-shadow)';
+            nav.style.zIndex = '1000';
+
+            const navLabels = {
+                main: 'メニュー',
+                editor: 'エディター',
+                todo: 'ToDo',
+                other: 'その他'
+            };
+            screens.forEach(id => {
+                const btn = document.createElement('button');
+                btn.textContent = navLabels[id];
+                btn.style.flex = '1';
+                btn.style.padding = '1em 0';
+                btn.style.fontSize = '1em';
+                btn.style.border = 'none';
+                btn.style.background = 'none';
+                btn.style.cursor = 'pointer';
+                btn.style.transition = 'background 0.2s';
+                btn.classList.toggle('active', id === 'main');
+                btn.addEventListener('click', () => {
+                    screens.forEach(sid => {
+                        document.getElementById(sid).classList.remove('active');
+                        const navBtns = nav.querySelectorAll('button');
+                        navBtns.forEach(b => b.classList.remove('active'));
+                    });
+                    document.getElementById(id).classList.add('active');
+                    btn.classList.add('active');
+                });
+                nav.appendChild(btn);
+            });
+            document.body.appendChild(nav);
+
+            // テーマ切替
+            const themeLightBtn = document.getElementById('themeLightBtn');
+            const themeDarkBtn = document.getElementById('themeDarkBtn');
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('kondate-theme', theme);
+            }
+            if (themeLightBtn && themeDarkBtn) {
+                themeLightBtn.addEventListener('click', () => setTheme('light'));
+                themeDarkBtn.addEventListener('click', () => setTheme('dark'));
+            }
+            // 初期テーマ
+            const savedTheme = localStorage.getItem('kondate-theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            }
+        });
+    </script>
+</body>
+
+</html>
