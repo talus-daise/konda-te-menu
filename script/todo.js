@@ -21,6 +21,16 @@ async function fetchTodos() {
     await loadTodos();
 }
 
+let currentType = 'work';
+const TODO_TYPES = [
+    { value: 'vegetable', label: '野菜室' },
+    { value: 'freezer', label: '冷凍庫' },
+    { value: 'fridge', label: '冷蔵庫' },
+    { value: 'diary', label: '日用品' },
+    { value: 'stock', label: 'ストック' },
+    { value: 'other', label: 'その他' }
+];
+
 async function loadTodos() {
     const { data, error } = await supabase.from("todos").select("*").order("id", { ascending: true });
     if (error) {
@@ -29,7 +39,8 @@ async function loadTodos() {
     }
     const todoList = document.getElementById("todoList");
     todoList.innerHTML = "";
-    data.forEach((todo) => {
+    const filtered = data.filter(todo => todo.type === currentType);
+    filtered.forEach((todo) => {
         const li = document.createElement("li");
         li.style.display = "flex";
         li.style.alignItems = "center";
@@ -58,6 +69,28 @@ async function loadTodos() {
             await toggleTodoChecked(todo);
         });
         todoList.appendChild(li);
+    });
+}
+
+function setupTypeTabs() {
+    const tabs = document.getElementById("todoTypeTabs");
+    tabs.innerHTML = "";
+    TODO_TYPES.forEach(type => {
+        const btn = document.createElement("button");
+        btn.textContent = type.label;
+        btn.style.padding = "0.5em 1em";
+        btn.style.border = "none";
+        btn.style.borderRadius = "0.5em";
+        btn.style.background = currentType === type.value ? "var(--color-primary)" : "#eee";
+        btn.style.color = currentType === type.value ? "#fff" : "#333";
+        btn.style.cursor = "pointer";
+        btn.style.fontWeight = currentType === type.value ? "700" : "400";
+        btn.addEventListener("click", () => {
+            currentType = type.value;
+            setupTypeTabs();
+            loadTodos();
+        });
+        tabs.appendChild(btn);
     });
 }
 
@@ -113,7 +146,9 @@ function showCandidates(candidates, inputValue) {
 async function handleFormSubmit(e) {
     e.preventDefault();
     const input = document.getElementById("todoInput");
+    const typeSel = document.getElementById("todoType");
     const value = input.value.trim();
+    const type = typeSel.value;
     if (!value) return;
     const tasks = value.split(/\s+/).filter(Boolean);
     for (const task of tasks) {
@@ -122,6 +157,7 @@ async function handleFormSubmit(e) {
             .from("todos")
             .select("*")
             .eq("task", task)
+            .eq("type", type)
             .limit(1);
         if (error) {
             alert("検索エラー: " + error.message);
@@ -135,7 +171,7 @@ async function handleFormSubmit(e) {
         // 新規追加
         const { error: insertError } = await supabase
             .from("todos")
-            .insert([{ task, is_checked: false }]);
+            .insert([{ task, is_checked: false, type }]);
         if (insertError) {
             alert("追加失敗: " + insertError.message);
         }
@@ -158,6 +194,7 @@ function setupFormAndCandidates() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    setupTypeTabs();
     fetchTodos();
     setupFormAndCandidates();
 });

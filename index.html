@@ -276,11 +276,19 @@
         <div class="todo">
             <h2>ToDo</h2>
             <form id="todoForm" style="margin-bottom: 1em; display: flex; gap: 0.5em; align-items: center;">
-                <input type="text" id="todoInput" placeholder="新しいToDoを入力" autocomplete="off"
-                    style="font-size:1em; padding:0.5em;" />
+                <select id="todoType" style="font-size:1em; padding:0.5em;">
+                    <option value="vegetable">野菜室</option>
+                    <option value="fridge">冷蔵庫</option>
+                    <option value="freezer">冷凍庫</option>
+                    <option value="diary">日用品</option>
+                    <option value="stock">ストック</option>
+                    <option value="other">その他</option>
+                </select>
+                <input type="text" id="todoInput" placeholder="新しいToDoを入力" autocomplete="off" style="font-size:1em; padding:0.5em;" />
                 <button type="submit" style="font-size:1em; padding:0.5em 1em;">追加</button>
             </form>
             <div id="todoCandidates" style="margin-bottom: 1em;"></div>
+            <div id="todoTypeTabs" style="margin-bottom:1em; display:flex; gap:0.5em;"></div>
             <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
     </div>
