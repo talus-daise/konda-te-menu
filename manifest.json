@@ -1,6 +1,6 @@
 {
 	"name": "こんだーてMenu",
-	"short_name": "こんだーてMenu",
+	"short_name": "こんだーて",
 	"start_url": "./index.html",
 	"display": "standalone",
 	"background_color": "#e0f7fa",
