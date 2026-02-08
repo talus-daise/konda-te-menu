@@ -32,7 +32,11 @@ const TODO_TYPES = [
 ];
 
 async function loadTodos() {
-    const { data, error } = await supabase.from("todos").select("*").order("task", { ascending: true });
+    const { data, error } = await supabase
+        .from("todos")
+        .select("*")
+        .order("is_checked", { ascending: true })
+        .order("task", { ascending: true });
     if (error) {
         console.error("Error fetching todos:", error);
         return;
@@ -121,6 +125,8 @@ async function toggleTodoChecked(todo) {
         .from("todos")
         .update({ is_checked: !todo.is_checked })
         .eq("id", todo.id);
+
+    loadTodos();
     if (error) {
         alert("トグルに失敗しました: " + error.message);
     }
