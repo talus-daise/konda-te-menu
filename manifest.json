@@ -1,11 +1,11 @@
 {
-	"name": "こんだーてMenu",
-	"short_name": "こんだーて",
+	"name": "買い物かご by talus",
+	"short_name": "買い物かご",
 	"start_url": "./index.html",
 	"display": "standalone",
 	"background_color": "#e0f7fa",
 	"theme_color": "#26a69a",
-	"description": "献立・ToDo管理アプリ",
+	"description": "買い物リスト・ToDo管理アプリ",
 	"icons": [
 		{
 			"src": "icon-192.png",

@@ -5,7 +5,7 @@ async function fetchTodos() {
         .channel("public:todos")
         .on(
             "postgres_changes",
-            { event: "*", schema: "public", table: "todos" },
+            { event: "*", schema: "public", table: "todos2" },
             (payload) => {
                 console.log("Change received!", payload);
                 loadTodos();
@@ -16,19 +16,9 @@ async function fetchTodos() {
     await loadTodos();
 }
 
-let currentType = 'vegetable';
-const TODO_TYPES = [
-    { value: 'vegetable', label: '野菜室' },
-    { value: 'freezer', label: '冷凍庫' },
-    { value: 'fridge', label: '冷蔵庫' },
-    { value: 'diary', label: '日用品' },
-    { value: 'stock', label: 'ストック' },
-    { value: 'other', label: 'その他' }
-];
-
 async function loadTodos() {
     const { data, error } = await supabase
-        .from("todos")
+        .from("todos2")
         .select("*")
         .order("is_checked", { ascending: true })
         .order("task", { ascending: true });
@@ -41,7 +31,7 @@ async function loadTodos() {
     const todoList = document.getElementById("todoList");
     todoList.innerHTML = "";
 
-    const filtered = data.filter(todo => todo.type === currentType);
+    const filtered = data;
 
     filtered.forEach((todo) => {
         const li = document.createElement("li");
@@ -56,8 +46,7 @@ async function loadTodos() {
 
         // ドラッグ処理
         li.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("application/todo-id", todo.id);
-            e.dataTransfer.setData("application/todo-type", todo.type);
+            e.dataTransfer.setData("application/todo2-id", todo.id);
             li.style.opacity = 0.5;
         });
         li.addEventListener("dragend", e => {
@@ -103,11 +92,11 @@ async function loadTodos() {
 // メニュー表示関数
 function showTodoMenu(todo, anchor) {
     // 既存メニュー削除
-    const existing = document.getElementById("todoMenu");
+    const existing = document.getElementById("todo2Menu");
     if (existing) existing.remove();
 
     const menu = document.createElement("div");
-    menu.id = "todoMenu";
+    menu.id = "todo2Menu";
     menu.style.position = "absolute";
     menu.style.background = "#fff";
     menu.style.border = "1px solid #ccc";
@@ -132,7 +121,7 @@ function showTodoMenu(todo, anchor) {
     editBtn.addEventListener("click", async () => {
         const newTask = prompt("タスク内容を編集:", todo.task);
         if (newTask && newTask.trim() !== "") {
-            await supabase.from("todos").update({ task: newTask.trim() }).eq("id", todo.id);
+            await supabase.from("todos2").update({ task: newTask.trim() }).eq("id", todo.id);
             loadTodos();
         }
         menu.remove();
@@ -149,7 +138,7 @@ function showTodoMenu(todo, anchor) {
     delBtn.style.cursor = "pointer";
     delBtn.addEventListener("click", async () => {
         if (confirm("本当に削除しますか？")) {
-            await supabase.from("todos").delete().eq("id", todo.id);
+            await supabase.from("todos2").delete().eq("id", todo.id);
             loadTodos();
         }
         menu.remove();
@@ -168,43 +157,9 @@ function showTodoMenu(todo, anchor) {
     document.addEventListener("click", closeMenu);
 }
 
-function setupTypeTabs() {
-    const tabs = document.getElementById("todoTypeTabs");
-    tabs.innerHTML = "";
-    TODO_TYPES.forEach(type => {
-        const btn = document.createElement("button");
-        btn.textContent = type.label;
-        btn.style.padding = "0.5em 1em";
-        btn.style.border = "none";
-        btn.style.borderRadius = "0.5em";
-        btn.style.background = currentType === type.value ? "var(--color-primary)" : "#eee";
-        btn.style.color = currentType === type.value ? "#fff" : "#333";
-        btn.style.cursor = "pointer";
-        btn.style.fontWeight = currentType === type.value ? "700" : "400";
-        btn.ondragover = e => { e.preventDefault(); btn.style.background = "#b2dfdb"; };
-        btn.ondragleave = e => { btn.style.background = currentType === type.value ? "var(--color-primary)" : "#eee"; };
-        btn.ondrop = async e => {
-            e.preventDefault();
-            btn.style.background = currentType === type.value ? "var(--color-primary)" : "#eee";
-            const todoId = e.dataTransfer.getData("application/todo-id");
-            const fromType = e.dataTransfer.getData("application/todo-type");
-            if (!todoId || fromType === type.value) return;
-            // type変更
-            await supabase.from("todos").update({ type: type.value }).eq("id", todoId);
-            loadTodos();
-        };
-        btn.addEventListener("click", () => {
-            currentType = type.value;
-            setupTypeTabs();
-            loadTodos();
-        });
-        tabs.appendChild(btn);
-    });
-}
-
 async function toggleTodoChecked(todo) {
     const { error } = await supabase
-        .from("todos")
+        .from("todos2")
         .update({ is_checked: !todo.is_checked })
         .eq("id", todo.id);
 
@@ -217,7 +172,7 @@ async function toggleTodoChecked(todo) {
 async function fetchCandidates(task) {
     if (!task) return [];
     const { data, error } = await supabase
-        .from("todos")
+        .from("todos2")
         .select("task, is_checked")
         .ilike("task", `%${task}%`)
         .order("id", { ascending: false });
@@ -235,7 +190,7 @@ async function fetchCandidates(task) {
 }
 
 function showCandidates(candidates, inputValue) {
-    const candidateDiv = document.getElementById("todoCandidates");
+    const candidateDiv = document.getElementById("todo2Candidates");
     candidateDiv.innerHTML = "";
     if (candidates.length === 0) return;
     const label = document.createElement("div");
@@ -246,8 +201,8 @@ function showCandidates(candidates, inputValue) {
         btn.textContent = c.task;
         btn.style.margin = "0 0.5em 0.5em 0";
         btn.addEventListener("click", () => {
-            document.getElementById("todoInput").value = c.task;
-            document.getElementById("todoInput").focus();
+            document.getElementById("todo2Input").value = c.task;
+            document.getElementById("todo2Input").focus();
         });
         candidateDiv.appendChild(btn);
     });
@@ -255,19 +210,16 @@ function showCandidates(candidates, inputValue) {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
-    const input = document.getElementById("todoInput");
-    const typeSel = document.getElementById("todoType");
+    const input = document.getElementById("todo2Input");
     const value = input.value.trim();
-    const type = typeSel.value;
     if (!value) return;
     const tasks = value.split(/\s+/).filter(Boolean);
     for (const task of tasks) {
         // 同名ToDoがあるかチェック
         const { data: existing, error } = await supabase
-            .from("todos")
+            .from("todos2")
             .select("*")
             .eq("task", task)
-            .eq("type", type)
             .limit(1);
         if (error) {
             alert("検索エラー: " + error.message);
@@ -280,8 +232,7 @@ async function handleFormSubmit(e) {
         }
         // 新規追加
         const { error: insertError } = await supabase
-            .from("todos")
-            .insert([{ task, is_checked: false, type }]);
+            .from("todos2")
         if (insertError) {
             alert("追加失敗: " + insertError.message);
         }
@@ -290,8 +241,8 @@ async function handleFormSubmit(e) {
 }
 
 function setupFormAndCandidates() {
-    const form = document.getElementById("todoForm");
-    const input = document.getElementById("todoInput");
+    const form = document.getElementById("todo2Form");
+    const input = document.getElementById("todo2Input");
     form.addEventListener("submit", handleFormSubmit);
     let lastValue = "";
     input.addEventListener("input", async () => {
@@ -304,7 +255,6 @@ function setupFormAndCandidates() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    setupTypeTabs();
     fetchTodos();
     setupFormAndCandidates();
 });
