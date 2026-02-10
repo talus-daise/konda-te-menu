@@ -304,7 +304,7 @@
                 <button id="themeLightBtn" style="margin-right:0.5em;">ライト</button>
                 <button id="themeDarkBtn">ダーク</button>
             </div>
-            <p>ここにその他の内容が入ります。</p>
+            <button id="enable-push">通知を許可する</button>
         </div>
     </div>
 
@@ -611,6 +611,10 @@
         }
 
         requestPermissionAndGetToken();
+
+        document.getElementById("enable-push").addEventListener("click", () => {
+            requestPermissionAndGetToken();
+        });
 
         // フォアグラウンド通知の待機
         onMessage(messaging, (payload) => {
