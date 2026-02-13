@@ -2,7 +2,7 @@ import { supabase } from "./supabase-client.js";
 
 async function fetchTodos() {
     const channel = supabase
-        .channel("public:todos")
+        .channel("public:todos2")
         .on(
             "postgres_changes",
             { event: "*", schema: "public", table: "todos2" },
@@ -28,7 +28,7 @@ async function loadTodos() {
         return;
     }
 
-    const todoList = document.getElementById("todoList");
+    const todoList = document.getElementById("todo2List");
     todoList.innerHTML = "";
 
     const filtered = data;
@@ -233,6 +233,7 @@ async function handleFormSubmit(e) {
         // 新規追加
         const { error: insertError } = await supabase
             .from("todos2")
+            .insert([{ task: task, is_checked: false }]);
         if (insertError) {
             alert("追加失敗: " + insertError.message);
         }
