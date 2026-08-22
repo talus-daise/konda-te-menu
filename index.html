@@ -4,6 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // 初期テーマを最速で適用（ページ表示直後にダークモードへ切り替わる「ちらつき」を防止）
+        (function () {
+            try {
+                var saved = localStorage.getItem('kondate-theme');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { /* localStorageが使えない環境は無視してデフォルト(ライト)のまま */ }
+        })();
+    </script>
     <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -220,6 +230,219 @@
                 width: 100%;
             }
         }
+
+        /* --- 追加UI: トースト通知（alert()の置き換え） --- */
+        .toast-container {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+            z-index: 2000;
+            pointer-events: none;
+            width: 90%;
+            max-width: 420px;
+        }
+
+        .toast {
+            background: var(--color-text);
+            color: var(--color-bg);
+            padding: 0.7em 1.2em;
+            border-radius: 0.6em;
+            font-size: 0.95em;
+            box-shadow: var(--color-shadow);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.25s, transform 0.25s;
+            text-align: center;
+        }
+
+        .toast--show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast--error {
+            background: #d32f2f;
+            color: #fff;
+        }
+
+        /* --- 追加UI: 確認・入力ダイアログ（confirm()/prompt()の置き換え） --- */
+        .dialog-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .dialog-overlay--show {
+            opacity: 1;
+        }
+
+        .dialog-box {
+            background: var(--color-card);
+            color: var(--color-text);
+            border-radius: 1em;
+            padding: 1.4em;
+            width: 85%;
+            max-width: 360px;
+            box-shadow: var(--color-shadow);
+        }
+
+        .dialog-message {
+            margin: 0 0 1em;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        .dialog-input {
+            width: 100%;
+            font-size: 1em;
+            padding: 0.6em;
+            border-radius: 0.5em;
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin-bottom: 1em;
+            box-sizing: border-box;
+        }
+
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6em;
+        }
+
+        .dialog-btn {
+            padding: 0.5em 1.1em;
+            border-radius: 0.5em;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+
+        .dialog-btn--cancel {
+            background: var(--color-bg-alt);
+            color: var(--color-text);
+        }
+
+        .dialog-btn--confirm {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        .dialog-btn--danger {
+            background: #d32f2f;
+        }
+
+        /* --- 追加UI: 空状態・エラー状態（真っ白な画面を防止） --- */
+        .empty-state,
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+            padding: 3em 1em;
+            color: #888;
+            text-align: center;
+        }
+
+        .empty-state i,
+        .error-state i {
+            font-size: 2em;
+            opacity: 0.6;
+        }
+
+        .error-state button {
+            margin-top: 0.5em;
+            padding: 0.5em 1.2em;
+        }
+
+        /* --- 追加UI: 読み込み中スケルトン --- */
+        .skeleton-item {
+            height: 2.6em;
+            border-radius: 0.5em;
+            margin-bottom: 0.5em;
+            background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg-alt) 50%, var(--color-border) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes skeleton-pulse {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* --- 追加UI: リスト上部ツールバー（残件数・一括削除） --- */
+        .list-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 0.6em;
+            font-size: 0.9em;
+        }
+
+        .list-summary {
+            color: #888;
+        }
+
+        .clear-checked-btn {
+            background: transparent;
+            color: #888;
+            border: 1px solid var(--color-border);
+            font-size: 0.85em;
+            padding: 0.4em 0.8em;
+        }
+
+        .clear-checked-btn:hover {
+            background: var(--color-bg-alt);
+            color: var(--color-text);
+        }
+
+        .input-hint {
+            font-size: 0.8em;
+            color: #999;
+            margin: 0.2em 0 0.8em;
+        }
+
+        /* --- 追加UI: カテゴリタブの未購入件数バッジ --- */
+        .type-tab__badge {
+            display: none;
+            margin-left: 0.4em;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 1em;
+            padding: 0.05em 0.5em;
+            font-size: 0.85em;
+        }
+
+        /* --- 追加UI: 下部ナビの未完了バッジ --- */
+        .nav-badge {
+            display: none;
+            position: absolute;
+            top: 0.4em;
+            right: 18%;
+            background: #d32f2f;
+            color: #fff;
+            border-radius: 1em;
+            font-size: 0.7em;
+            padding: 0.05em 0.4em;
+            min-width: 1.4em;
+            text-align: center;
+        }
     </style>
     <title>こんだーてMenu</title>
 </head>
@@ -228,7 +451,7 @@
     <div class="screen active" id="todo">
         <div class="todo">
             <h2>買い物リスト</h2>
-            <form id="todoForm" style="margin-bottom: 1em; display: flex; gap: 0.5em; align-items: center;">
+            <form id="todoForm" style="margin-bottom: 0.3em; display: flex; gap: 0.5em; align-items: center;">
                 <select id="todoType" style="font-size:1em; padding:0.5em;">
                     <option value="vegetable">野菜室</option>
                     <option value="fridge">冷蔵庫</option>
@@ -241,23 +464,36 @@
                     style="font-size:1em; padding:0.5em;" />
                 <button type="submit" style="font-size:1em; padding:0.5em 1em;">追加</button>
             </form>
+            <p class="input-hint">スペース区切りで複数まとめて追加できます</p>
             <div id="todoCandidates" style="margin-bottom: 1em;"></div>
-            <div id="todoTypeTabs" style="margin-bottom:1em; display:flex; gap:0.5em;"></div>
-            <ul id="todoList" style="list-style:none; padding:0; margin:0; height: 70vh; overflow: auto;"></ul>
+            <div id="todoTypeTabs" style="margin-bottom:1em; display:flex; gap:0.5em; flex-wrap:wrap;"></div>
+            <div class="list-toolbar">
+                <span id="todoSummary" class="list-summary"></span>
+                <button type="button" id="todoClearChecked" class="clear-checked-btn">
+                    <i class="fa-solid fa-broom"></i> 購入済みを削除
+                </button>
+            </div>
+            <ul id="todoList" style="list-style:none; padding:0; margin:0; height: 60vh; overflow: auto;"></ul>
         </div>
     </div>
 
     <div class="screen" id="todo2">
         <div class="todo2">
             <h2>ToDo</h2>
-            <form id="todo2Form" style="margin-bottom: 1em; display: flex; gap: 0.5em; align-items: center;">
+            <form id="todo2Form" style="margin-bottom: 0.3em; display: flex; gap: 0.5em; align-items: center;">
                 <input type="text" id="todo2Input" placeholder="新しいToDoを入力" autocomplete="off"
                     style="font-size:1em; padding:0.5em;" />
                 <button type="submit" style="font-size:1em; padding:0.5em 1em;">追加</button>
             </form>
+            <p class="input-hint">スペース区切りで複数まとめて追加できます</p>
             <div id="todo2Candidates" style="margin-bottom: 1em;"></div>
-            <div id="todo2TypeTabs" style="margin-bottom:1em; display:flex; gap:0.5em;"></div>
-            <ul id="todo2List" style="list-style:none; padding:0; margin:0; height: 70vh; overflow: auto;"></ul>
+            <div class="list-toolbar">
+                <span id="todo2Summary" class="list-summary"></span>
+                <button type="button" id="todo2ClearChecked" class="clear-checked-btn">
+                    <i class="fa-solid fa-broom"></i> 完了済みを削除
+                </button>
+            </div>
+            <ul id="todo2List" style="list-style:none; padding:0; margin:0; height: 66vh; overflow: auto;"></ul>
         </div>
     </div>
 
@@ -297,9 +533,9 @@
                 todo2: 'ToDo',
                 other: 'その他'
             };
+            const navBadges = {};
             screens.forEach(id => {
                 const btn = document.createElement('button');
-                btn.textContent = navLabels[id];
                 btn.style.flex = '1';
                 btn.style.padding = '1em 0';
                 btn.style.fontSize = '1em';
@@ -307,6 +543,18 @@
                 btn.style.background = 'none';
                 btn.style.cursor = 'pointer';
                 btn.style.transition = 'background 0.2s';
+                btn.style.position = 'relative';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.textContent = navLabels[id];
+                btn.appendChild(labelSpan);
+
+                // 未完了件数バッジ（todo.js / todo2.js からのイベントで更新）
+                const badge = document.createElement('span');
+                badge.className = 'nav-badge';
+                btn.appendChild(badge);
+                navBadges[id] = badge;
+
                 btn.classList.toggle('active', id === 'todo');
                 btn.addEventListener('click', () => {
                     screens.forEach(sid => {
@@ -321,7 +569,15 @@
             });
             document.body.appendChild(nav);
 
-            // テーマ切替
+            function updateNavBadge(badgeEl, count) {
+                if (!badgeEl) return;
+                badgeEl.textContent = count > 99 ? '99+' : String(count);
+                badgeEl.style.display = count > 0 ? 'inline-flex' : 'none';
+            }
+            window.addEventListener('todos:updated', (e) => updateNavBadge(navBadges.todo, e.detail.unchecked));
+            window.addEventListener('todos2:updated', (e) => updateNavBadge(navBadges.todo2, e.detail.unchecked));
+
+            // テーマ切替ボタン（初期テーマは<head>内の早期スクリプトで適用済み）
             const themeLightBtn = document.getElementById('themeLightBtn');
             const themeDarkBtn = document.getElementById('themeDarkBtn');
             function setTheme(theme) {
@@ -331,13 +587,6 @@
             if (themeLightBtn && themeDarkBtn) {
                 themeLightBtn.addEventListener('click', () => setTheme('light'));
                 themeDarkBtn.addEventListener('click', () => setTheme('dark'));
-            }
-            // 初期テーマ
-            const savedTheme = localStorage.getItem('kondate-theme');
-            if (savedTheme) {
-                setTheme(savedTheme);
-            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                setTheme('dark');
             }
         });
     </script>
